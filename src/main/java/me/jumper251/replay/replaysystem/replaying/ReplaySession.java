@@ -47,7 +47,13 @@ public class ReplaySession {
 
 	public void startSession(Location start) {
 		this.content = this.player.getInventory().getContents();
+
 		this.start = start;
+
+		if (this.start == null) {
+			this.start = this.player.getLocation();
+		}
+
 		this.level = this.player.getLevel();
 		this.xp = this.player.getExp();
 
@@ -111,11 +117,12 @@ public class ReplaySession {
 						player.showPlayer(all);
 					}
 				}
-				
+
+				ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(replayer.getReplay(), player, replayer);
+				Bukkit.getPluginManager().callEvent(finishEvent);
 			}
 		}.runTask(ReplaySystem.getInstance());
-		
-		
+
 
 	}
 	
@@ -131,7 +138,11 @@ public class ReplaySession {
 		player.setLevel(level);
 		player.setExp(xp);
 	}
-	
+
+	public void setStart(Location start) {
+		this.start = start;
+	}
+
 	public ReplayPacketListener getPacketListener() {
 		return packetListener;
 	}

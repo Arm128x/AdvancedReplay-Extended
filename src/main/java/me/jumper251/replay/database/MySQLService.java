@@ -50,6 +50,7 @@ public class MySQLService extends DatabaseService {
 
 	@Override
 	public void addReplay(String id, String creator, int duration, Long time, byte[] data) throws SQLException {
+
 		try(PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?)")) {
 			pst.setString(1, id);
 			pst.setString(2, creator);
@@ -60,6 +61,26 @@ public class MySQLService extends DatabaseService {
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+		PreparedStatement pst = database.getConnection().prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE creator = ?, duration = ?, time = ?, data = ?");
+		pst.setString(1, id);
+		pst.setString(2, creator);
+		pst.setInt(3, duration);
+		pst.setLong(4, time);
+		pst.setBytes(5, data);
+
+		pst.setString(6, creator);
+		pst.setInt(7, duration);
+		pst.setLong(8, time);
+		pst.setBytes(9, data);
+		
+		pool.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				database.update(pst);
+				
+			}
+		});
 		
 	}
 

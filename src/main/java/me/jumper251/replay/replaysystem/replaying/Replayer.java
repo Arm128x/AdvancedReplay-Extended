@@ -85,8 +85,12 @@ public class Replayer {
 
 		ReplayData data = this.replay.getData();
 		int duration = data.getDuration();
+
 		Location start = watcher.getLocation();
 		SpawnData tempSpawnData;
+
+		this.session.setStart(watcher.getLocation());
+
 		if (data.getActions().containsKey(0)) {
 			for (ActionData startData : data.getActions().get(0)) {
 				if (startData.getPacketData() instanceof SpawnData) {

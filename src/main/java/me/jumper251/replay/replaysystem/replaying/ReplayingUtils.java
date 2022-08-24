@@ -345,8 +345,7 @@ public class ReplayingUtils {
 				npc.remove();
 				replayer.getNPCList().remove(action.getName());
 				
-				SpawnData oldSpawnData = new SpawnData(npc.getUuid(), LocationData.fromLocation(npc.getLocation()), signatures.get(action.getName()),
-						WorldHandler.UUID_HASHCODE.get(npc.getLocation().getWorld().getUID()));
+				SpawnData oldSpawnData = new SpawnData(npc.getUuid(), LocationData.fromLocation(npc.getLocation()), signatures.get(action.getName()));
 				this.lastSpawnActions.addLast(new ActionData(0, ActionType.SPAWN, action.getName(), oldSpawnData));
 				
 				if (action.getType() == ActionType.DESPAWN) {

@@ -26,6 +26,10 @@ public class ReplayData implements Serializable{
 	private String creator;
 	
 	private ReplayQuality quality;
+
+	private String worldHashCode;
+
+	private String worldName;
 	
 	public ReplayData() {
 		this.actions = new HashMap<Integer, List<ActionData>>();
@@ -72,5 +76,21 @@ public class ReplayData implements Serializable{
 		} else {
 			return null;
 		}
+	}
+
+	public String getWorldHashCode() {
+		return worldHashCode;
+	}
+
+	public void setWorldHashCode(String worldHashCode) {
+		this.worldHashCode = worldHashCode;
+	}
+
+	public String getWorldName() {
+		return worldName;
+	}
+
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
 	}
 }

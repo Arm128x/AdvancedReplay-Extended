@@ -190,7 +190,7 @@ public class SWMWorldManager implements IWorldManger {
     @Override
     public void onReplayStart(Replayer replayer, SpawnData spawnData) {
         String destination = ReplaySystem.getInstance().getDataFolder()+"/downloadedWorlds";
-        String replayWorld = spawnData.getLocation().getWorld()+"_"+spawnData.getWorldHashCode();
+        String replayWorld = replayer.getReplay().getData().getWorldName()+"_"+replayer.getReplay().getData().getWorldHashCode();
         ReplaySystem.getInstance().getLogger().info("onReplayStart");
         //check if world is already loaded
         replayer.setPaused(true);
@@ -233,7 +233,7 @@ public class SWMWorldManager implements IWorldManger {
         //download world from database async
         Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld");
-            File file = ReplaySystem.getInstance().worldManger.downloadWorld(spawnData.getWorldHashCode());
+            File file = ReplaySystem.getInstance().worldManger.downloadWorld(replayer.getReplay().getData().getWorldHashCode());
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done");
             if (file==null){
                 //TODO: attempt unsafe world loading

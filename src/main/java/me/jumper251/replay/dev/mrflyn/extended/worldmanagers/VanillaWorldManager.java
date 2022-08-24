@@ -120,7 +120,7 @@ public class VanillaWorldManager implements IWorldManger {
     @Override
     public void onReplayStart(Replayer replayer, SpawnData spawnData) {
         String destination = ReplaySystem.getInstance().getDataFolder()+"/downloadedWorlds";
-        String replayWorld = spawnData.getLocation().getWorld()+"_"+spawnData.getWorldHashCode();
+        String replayWorld = replayer.getReplay().getData().getWorldName()+"_"+replayer.getReplay().getData().getWorldHashCode();
         //check if world is already loaded
         replayer.setPaused(true);
         if (Bukkit.getWorld(replayWorld)!=null){
@@ -144,7 +144,7 @@ public class VanillaWorldManager implements IWorldManger {
         }
         //download world from database async
         Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
-            File file = ReplaySystem.getInstance().worldManger.downloadWorld(spawnData.getWorldHashCode());
+            File file = ReplaySystem.getInstance().worldManger.downloadWorld(replayer.getReplay().getData().getWorldHashCode());
             if (file==null){
                 //TODO: attempt unsafe world loading
                 Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{

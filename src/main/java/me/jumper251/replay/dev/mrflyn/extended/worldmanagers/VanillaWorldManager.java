@@ -123,6 +123,7 @@ public class VanillaWorldManager implements IWorldManger {
         String replayWorld = replayer.getReplay().getData().getWorldName()+"_"+replayer.getReplay().getData().getWorldHashCode();
         //check if world is already loaded
         replayer.setPaused(true);
+        replayer.setSpawnWorld(replayer.getReplay().getData().getWorldName());
         if (Bukkit.getWorld(replayWorld)!=null){
             //TODO: add number to watching replays in this world.
             worldWatcherIncrement(replayWorld, 1);

@@ -82,6 +82,7 @@ public class Replayer {
 	
 	
 	public void start() {
+		System.out.println("REPLAY STARTED: "+this.replay.getId());
 
 		ReplayData data = this.replay.getData();
 		int duration = data.getDuration();
@@ -117,7 +118,7 @@ public class Replayer {
 			public void run() {
 				if (Replayer.this.spawnWorld==null)return;
 				if (Replayer.this.paused) return;
-				
+
 				Replayer.this.tmpTicks += speed;
 				if (Replayer.this.tmpTicks % 1 != 0) return;
 				

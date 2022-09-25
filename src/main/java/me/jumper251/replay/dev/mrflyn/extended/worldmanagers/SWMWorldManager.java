@@ -192,6 +192,7 @@ public class SWMWorldManager implements IWorldManger {
         String destination = ReplaySystem.getInstance().getDataFolder()+"/downloadedWorlds";
         String replayWorld = replayer.getReplay().getData().getWorldName()+"_"+replayer.getReplay().getData().getWorldHashCode();
         ReplaySystem.getInstance().getLogger().info("onReplayStart");
+        replayer.setSpawnWorld(replayer.getReplay().getData().getWorldName());
         //check if world is already loaded
         replayer.setPaused(true);
         if (Bukkit.getWorld(replayWorld)!=null){

@@ -100,11 +100,12 @@ public class ReplayingUtils {
 		if (action.getType() == ActionType.PACKET && this.replayer.getNPCList().containsKey(action.getName())) {
 			INPC npc = this.replayer.getNPCList().get(action.getName());
 
-			
+
+
 			if (action.getPacketData() instanceof MovingData) {
 				MovingData movingData = (MovingData) action.getPacketData();
-				
 				if (VersionUtil.isAbove(VersionEnum.V1_15) || VersionUtil.isCompatible(VersionEnum.V1_8)) {
+
 					double distance = npc.getLocation().distance(new Location(npc.getOrigin().getWorld(), movingData.getX(), movingData.getY(), movingData.getZ()));
 
 					if (distance > 8) {
@@ -443,13 +444,12 @@ public class ReplayingUtils {
 			tabMode = 2;
 			spawnData.setUuid(UUID.randomUUID());
 		}
-
-		INPC npc = !VersionUtil.isCompatible(VersionEnum.V1_8) ? new PacketNPC(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName()) : new PacketNPCOld(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName());
+		Location spawn = LocationData.toLocation(spawnData.getLocation(), this.replayer.getSpawnWorld());
+		INPC npc = !VersionUtil.isCompatible(VersionEnum.V1_8) ? new PacketNPC(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName(), spawn) : new PacketNPCOld(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName(), spawn);
 		this.replayer.getNPCList().put(action.getName(), npc);
 		this.replayer.getReplay().getData().getWatchers().put(action.getName(), new PlayerWatcher(action.getName()));
 
-		Location spawn = LocationData.toLocation(spawnData.getLocation(), this.replayer.getSpawnWorld());
-		
+
 		if(VersionUtil.isCompatible(VersionEnum.V1_8)) {
 			npc.setData(new MetadataBuilder(this.replayer.getWatchingPlayer()).resetValue().getData());
 		} else {

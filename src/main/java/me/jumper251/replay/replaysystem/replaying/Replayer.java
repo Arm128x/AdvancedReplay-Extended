@@ -144,6 +144,7 @@ public class Replayer {
 	}
 	
 	public void executeTick(int tick, boolean reversed) {
+		if(Replayer.this.paused)return;
 		if (Replayer.this.spawnWorld==null)return;
 		ReplayData data = this.replay.getData();
 		if (!data.getActions().isEmpty() && data.getActions().containsKey(tick)) {

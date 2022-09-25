@@ -71,17 +71,16 @@ public class PacketNPCOld implements INPC{
 	
 	private List<WrapperPlayServerEntityEquipment> lastEquipment;
 	
-	public PacketNPCOld(int id, UUID uuid, String name) {
+	public PacketNPCOld(int id, UUID uuid, String name, Location loc) {
 		this.id = id;
 		this.uuid = uuid;
 		this.name = name;
 		this.tabMode = 1;
 		this.lastEquipment = new ArrayList<WrapperPlayServerEntityEquipment>();
 		this.spawnPacket = new WrapperPlayServerNamedEntitySpawn();
-	}
-	
-	public PacketNPCOld() {
-		this(MathUtils.randInt(50000, 400000), UUID.randomUUID(), StringUtils.getRandomString(6));
+		this.location = loc;
+		this.origin = loc;
+		this.visible = new Player[0];
 	}
 	
 	public void spawn(Location loc, int tabMode, Player... players) {
@@ -200,9 +199,7 @@ public class PacketNPCOld implements INPC{
 		packet.setZ(loc.getZ());
 		packet.setPitch(pitch);
 		packet.setYaw(yaw);
-
 		this.location = loc;
-
 		for(Player player : Arrays.asList(this.visible)) {
 			if(player != null) {
 				packet.sendPacket(player);

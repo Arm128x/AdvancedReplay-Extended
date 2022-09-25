@@ -67,18 +67,18 @@ public class PacketNPC implements INPC{
 	
 	private List<WrapperPlayServerEntityEquipment> lastEquipment;
 	
-	public PacketNPC(int id, UUID uuid, String name) {
+	public PacketNPC(int id, UUID uuid, String name, Location loc) {
 		this.id = id;
 		this.uuid = uuid;
 		this.name = name;
 		this.tabMode = 1;
 		this.lastEquipment = new ArrayList<WrapperPlayServerEntityEquipment>();
 		this.spawnPacket = new WrapperPlayServerNamedEntitySpawn();
+		this.location = loc;
+		this.origin = loc;
+		this.visible = new Player[0];
 	}
-	
-	public PacketNPC() {
-		this(MathUtils.randInt(50000, 400000), UUID.randomUUID(), StringUtils.getRandomString(6));
-	}
+
 	
 	public void spawn(Location loc, int tabMode, Player... players) {
 		this.tabMode = tabMode;

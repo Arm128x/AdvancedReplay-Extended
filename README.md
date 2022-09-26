@@ -1,4 +1,4 @@
-# AdvancedReplay
+# AdvancedReplay-Extended
 
 Extra features in this fork:-
 - Duplicate World Creation for replay.(Creates a seperate replay world where all replays take place and gets unloaded when no one is watching)

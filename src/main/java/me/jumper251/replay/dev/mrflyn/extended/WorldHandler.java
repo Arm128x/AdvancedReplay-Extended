@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class WorldHandler {
-    public static HashMap<UUID, String> UUID_HASHCODE = new HashMap<>();
+    public static HashMap<String, String> WORLD_NAME_HASHCODE = new HashMap<>();
     public static HashMap<String, Integer> WORLD_WATCHER = new HashMap<>();
     public static void onReplayStart(Replayer replayer, SpawnData spawnData){
         if (!ConfigManager.USE_DATABASE){

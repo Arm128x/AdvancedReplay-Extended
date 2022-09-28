@@ -1,13 +1,18 @@
 package me.jumper251.replay;
 
 
+import java.io.File;
 import java.util.HashMap;
 
 
+import me.jumper251.replay.com.twmacinta.util.MD5;
 import me.jumper251.replay.dev.mrflyn.extended.VanillaListeners;
+import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.IWorldManger;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.SWMWorldManager;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.VanillaWorldManager;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -54,6 +59,18 @@ public class ReplaySystem extends JavaPlugin {
 
 		if (Bukkit.getServer().getPluginManager().getPlugin("SlimeWorldManager")!=null){
 			worldManger = new SWMWorldManager();
+			File slimeWorlds = new File("slime_worlds");
+			if (slimeWorlds.exists()&&slimeWorlds.isDirectory()) {
+				File[] files = slimeWorlds.listFiles();
+				if (files!=null) {
+					for (File file : files) {
+						if (!file.getName().endsWith(".slime"))continue;
+						String hashcode = worldManger.uploadWorld(file);
+						if (hashcode==null)continue;
+						WorldHandler.WORLD_NAME_HASHCODE.put(file.getName().substring(0,file.getName().length()-6), hashcode);
+					}
+				}
+			}
 
 		}else {
 			worldManger = new VanillaWorldManager();

@@ -18,7 +18,6 @@ import org.bukkit.event.Listener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.UUID;
 
 import static me.jumper251.replay.dev.mrflyn.extended.WorldHandler.worldWatcherIncrement;
 
@@ -32,13 +31,12 @@ public class VanillaWorldManager implements IWorldManger {
 
     @Override
     public void onWorldLoad(World world) {
-        UUID uid = world.getUID();
         if(!ConfigManager.UPLOAD_WORLDS)return;
         if (ConfigManager.BLACKLISTED_UPLOAD_WORDLS.contains(world.getName()))return;
         Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
             String hashcode = ReplaySystem.getInstance().worldManger.uploadWorld(world.getName());
             if(hashcode==null)return;
-            WorldHandler.UUID_HASHCODE.put(uid, hashcode);
+            WorldHandler.WORLD_NAME_HASHCODE.put(world.getName(), hashcode);
         });
     }
 
@@ -52,6 +50,22 @@ public class VanillaWorldManager implements IWorldManger {
             ByteArrayOutputStream os = WorldUtils.createTarGzip(folder);
             //TODO: store
             DatabaseRegistry.getDatabase().getService().setWorld(hashcode, Bukkit.getWorld(uid).getName(), os.toByteArray(), "vanilla");
+            return hashcode;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String uploadWorld(File file) {
+        try {
+            String hashcode = WorldUtils.hashDirectory(file);
+            if (hashcode == null) return null;
+            if (DatabaseRegistry.getDatabase().getService().hasWorld(hashcode)) return hashcode;
+            ByteArrayOutputStream os = WorldUtils.createTarGzip(file);
+            //TODO: store
+            DatabaseRegistry.getDatabase().getService().setWorld(hashcode, file.getName(), os.toByteArray(), "vanilla");
             return hashcode;
         }catch (Exception e){
             e.printStackTrace();

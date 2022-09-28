@@ -15,15 +15,11 @@ import me.jumper251.replay.replaysystem.replaying.Replayer;
 import me.jumper251.replay.utils.LogUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.event.Listener;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 import static me.jumper251.replay.dev.mrflyn.extended.WorldHandler.worldWatcherIncrement;
 
@@ -43,13 +39,13 @@ public class SWMWorldManager implements IWorldManger {
 //        if (query==2){
 //            query = 0;
 //        }
-        UUID uid = world.getUID();
+
         if(!ConfigManager.UPLOAD_WORLDS)return;
         if (ConfigManager.BLACKLISTED_UPLOAD_WORDLS.contains(world.getName()))return;
 //        Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
             String hashcode = ReplaySystem.getInstance().worldManger.uploadWorld(world.getName());
             if(hashcode==null)return;
-            WorldHandler.UUID_HASHCODE.put(uid, hashcode);
+            WorldHandler.WORLD_NAME_HASHCODE.put(world.getName(), hashcode);
 //        try {
 //            ReplaySystem.getInstance().getLogger().info("Sleeping");
 //            Thread.sleep(3000L);
@@ -85,6 +81,27 @@ public class SWMWorldManager implements IWorldManger {
         }catch (Exception e){
             if (!(e instanceof NullPointerException))
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String uploadWorld(File file) {
+        try {
+            String hashcode = null;
+            byte[] data = null;
+
+            data = Files.readAllBytes(file.toPath());
+            hashcode = WorldUtils.hash(data);
+
+            if (hashcode == null) return null;
+            if (data == null)return null;
+            if (DatabaseRegistry.getDatabase().getService().hasWorld(hashcode)) return hashcode;
+            DatabaseRegistry.getDatabase().getService().setWorld(hashcode, file.getName(), data, "slime");
+            return hashcode;
+        }catch (Exception e){
+            if (!(e instanceof NullPointerException))
+                e.printStackTrace();
         }
         return null;
     }

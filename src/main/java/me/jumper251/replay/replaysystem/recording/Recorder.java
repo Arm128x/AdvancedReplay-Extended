@@ -54,7 +54,7 @@ public class Recorder {
 		this.players = new ArrayList<String>();
 		this.data = new ReplayData();
 		this.data.setWorldName(players.get(0).getWorld().getName());
-		this.data.setWorldHashCode(WorldHandler.UUID_HASHCODE.get(players.get(0).getWorld().getUID()));
+		this.data.setWorldHashCode(WorldHandler.WORLD_NAME_HASHCODE.get(players.get(0).getWorld().getName()));
 		this.replay = replay;
 		this.sender = sender;
 		

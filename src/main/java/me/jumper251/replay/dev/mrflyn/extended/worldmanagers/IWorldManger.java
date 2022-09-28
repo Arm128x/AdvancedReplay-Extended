@@ -16,6 +16,8 @@ public interface IWorldManger {
     //call async to save performance
     String uploadWorld(String name);
 
+    String uploadWorld(File file);
+
     //call this to download a world from the db, using world's hashcode.
     //call async to save performance
     File downloadWorld(String hashcode);

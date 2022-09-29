@@ -1,6 +1,7 @@
 package me.jumper251.replay.database;
 
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,15 +33,18 @@ public class MySQLService extends DatabaseService {
 	
 	@Override
 	public void createReplayTable() {
-		try(PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + this.parentTable + " (id VARCHAR(40) PRIMARY KEY UNIQUE, creator VARCHAR(30), duration INT(255), time BIGINT(255), data LONGBLOB);")){
-			pst.executeUpdate();
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("CREATE TABLE IF NOT EXISTS " + this.parentTable + " (id VARCHAR(40) PRIMARY KEY UNIQUE, creator VARCHAR(30), duration INT(255), time BIGINT(255), data LONGBLOB);")) {
+				pst.executeUpdate();
+			}
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		try(PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + this.worldTable
-				+ " (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, hashcode VARCHAR(200), world_name VARCHAR(200), data LONGBLOB, type VARCHAR(200));"))
-		{
-			pst.executeUpdate();
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("CREATE TABLE IF NOT EXISTS " + this.worldTable
+					+ " (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, hashcode VARCHAR(200), world_name VARCHAR(200), data LONGBLOB, type VARCHAR(200));")) {
+				pst.executeUpdate();
+			}
 		}
 		catch (Exception e){
 			e.printStackTrace();
@@ -51,50 +55,57 @@ public class MySQLService extends DatabaseService {
 	@Override
 	public void addReplay(String id, String creator, int duration, Long time, byte[] data) throws SQLException {
 
-		try(PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?)")) {
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?)")) {
+				pst.setString(1, id);
+				pst.setString(2, creator);
+				pst.setInt(3, duration);
+				pst.setLong(4, time);
+				pst.setBytes(5, data);
+				pst.executeUpdate();
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		try(Connection c = database.getDataSource().getConnection()) {
+			PreparedStatement pst = c.prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE creator = ?, duration = ?, time = ?, data = ?");
 			pst.setString(1, id);
 			pst.setString(2, creator);
 			pst.setInt(3, duration);
 			pst.setLong(4, time);
 			pst.setBytes(5, data);
-			pst.executeUpdate();
+
+			pst.setString(6, creator);
+			pst.setInt(7, duration);
+			pst.setLong(8, time);
+			pst.setBytes(9, data);
+
+			pool.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					database.update(pst);
+
+				}
+			});
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		PreparedStatement pst = database.getConnection().prepareStatement("INSERT INTO " + this.parentTable + " (id, creator, duration, time, data) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE creator = ?, duration = ?, time = ?, data = ?");
-		pst.setString(1, id);
-		pst.setString(2, creator);
-		pst.setInt(3, duration);
-		pst.setLong(4, time);
-		pst.setBytes(5, data);
-
-		pst.setString(6, creator);
-		pst.setInt(7, duration);
-		pst.setLong(8, time);
-		pst.setBytes(9, data);
-		
-		pool.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				database.update(pst);
-				
-			}
-		});
 		
 	}
 
 	@Override
 	public byte[] getReplayData(String id) {
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT data FROM " + this.parentTable + " WHERE id = ?"))
-		{
-			pst.setString(1, id);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				return rs.getBytes(1);
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT data FROM " + this.parentTable + " WHERE id = ?")) {
+				pst.setString(1, id);
+				ResultSet rs = pst.executeQuery();
+				while (rs.next()) {
+					return rs.getBytes(1);
+				}
+				pst.close();
 			}
-			pst.close();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -104,10 +115,12 @@ public class MySQLService extends DatabaseService {
 
 	@Override
 	public void deleteReplay(String id) {
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("DELETE FROM " + this.parentTable + " WHERE id = ?")){
-			pst.setString(1, id);
-			pst.executeUpdate();
-		} catch (Exception e) {
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("DELETE FROM " + this.parentTable + " WHERE id = ?")) {
+				pst.setString(1, id);
+				pst.executeUpdate();
+			}
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -115,15 +128,16 @@ public class MySQLService extends DatabaseService {
 
 	@Override
 	public boolean exists(String id) {
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT COUNT(1) FROM " + this.parentTable + " WHERE id = ?"))
-			{
-			pst.setString(1, id);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				return rs.getInt(1) > 0;
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT COUNT(1) FROM " + this.parentTable + " WHERE id = ?")) {
+				pst.setString(1, id);
+				ResultSet rs = pst.executeQuery();
+				while (rs.next()) {
+					return rs.getInt(1) > 0;
+				}
+				pst.close();
 			}
-			pst.close();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -132,20 +146,21 @@ public class MySQLService extends DatabaseService {
 	@Override
 	public List<ReplayInfo> getReplays() {
 		List<ReplayInfo> replays = new ArrayList<>();
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT id,creator,duration,time FROM " + this.parentTable))
-		{
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				String id = rs.getString("id");
-				String creator = rs.getString("creator");
-				int duration = rs.getInt("duration");
-				long time = rs.getLong("time");
-				
-				replays.add(new ReplayInfo(id, creator, time, duration));
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT id,creator,duration,time FROM " + this.parentTable)) {
+				ResultSet rs = pst.executeQuery();
+				while (rs.next()) {
+					String id = rs.getString("id");
+					String creator = rs.getString("creator");
+					int duration = rs.getInt("duration");
+					long time = rs.getLong("time");
+
+					replays.add(new ReplayInfo(id, creator, time, duration));
+				}
+
+				pst.close();
 			}
-			
-			pst.close();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -155,32 +170,35 @@ public class MySQLService extends DatabaseService {
 	@Override
 	public boolean hasWorld(String hashcode){
 		ReplaySystem.getInstance().getLogger().info("hasWorld: "+hashcode);
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT hashcode FROM " + this.worldTable+" WHERE hashcode=?;"))
-		{
-			pst.setString(1, hashcode);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()){
-				ReplaySystem.getInstance().getLogger().info("hasWorld: "+hashcode+ " Done!");
-				return rs.getString("hashcode").equals(hashcode);
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT hashcode FROM " + this.worldTable + " WHERE hashcode=?;")) {
+				pst.setString(1, hashcode);
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					ReplaySystem.getInstance().getLogger().info("hasWorld: " + hashcode + " Done!");
+					return rs.getString("hashcode").equals(hashcode);
+				}
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return false;
 	}
 
 	@Override
 	public RawWorld getWorld(String hashcode) {
 		ReplaySystem.getInstance().getLogger().info("getWorld: "+hashcode);
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT * FROM " + this.worldTable + " WHERE hashcode=?;"))
-		{
-			pst.setString(1, hashcode);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()) {
-				ReplaySystem.getInstance().getLogger().info("getWorld: "+hashcode+ " Done!");
-				return new RawWorld(rs.getString("world_name"), hashcode ,rs.getBytes("data"), rs.getString("type"));
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT * FROM " + this.worldTable + " WHERE hashcode=?;")) {
+				pst.setString(1, hashcode);
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					ReplaySystem.getInstance().getLogger().info("getWorld: " + hashcode + " Done!");
+					return new RawWorld(rs.getString("world_name"), hashcode, rs.getBytes("data"), rs.getString("type"));
+				}
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -188,14 +206,15 @@ public class MySQLService extends DatabaseService {
 
 	@Override
 	public RawWorld getWorldFromName(String name) {
-		try (PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("SELECT * FROM " + this.worldTable + " WHERE world_name=?;"))
-		{
-			pst.setString(1, name);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()) {
-				new RawWorld(name, rs.getString("hashcode") ,rs.getBytes("data"), rs.getString("type"));
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("SELECT * FROM " + this.worldTable + " WHERE world_name=?;")) {
+				pst.setString(1, name);
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					new RawWorld(name, rs.getString("hashcode"), rs.getBytes("data"), rs.getString("type"));
+				}
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -204,15 +223,16 @@ public class MySQLService extends DatabaseService {
 	@Override
 	public void setWorld(String hashcode, String name, byte[] data, String type) {
 		ReplaySystem.getInstance().getLogger().info("setWorld: "+hashcode+ " "+name);
-		try(PreparedStatement pst = database.getDataSource().getConnection().prepareStatement("INSERT INTO " + this.worldTable + " (hashcode, world_name, data, type) VALUES (?, ?, ?, ?);"))
-		{
-			pst.setString(1, hashcode);
-			pst.setString(2, name);
-			pst.setBytes(3, data);
-			pst.setString(4, type);
-			pst.executeUpdate();
-			ReplaySystem.getInstance().getLogger().info("setWorld: "+hashcode+ " "+name+ " Done!");
-		} catch (Exception e) {
+		try(Connection c = database.getDataSource().getConnection()) {
+			try (PreparedStatement pst = c.prepareStatement("INSERT INTO " + this.worldTable + " (hashcode, world_name, data, type) VALUES (?, ?, ?, ?);")) {
+				pst.setString(1, hashcode);
+				pst.setString(2, name);
+				pst.setBytes(3, data);
+				pst.setString(4, type);
+				pst.executeUpdate();
+				ReplaySystem.getInstance().getLogger().info("setWorld: " + hashcode + " " + name + " Done!");
+			}
+		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

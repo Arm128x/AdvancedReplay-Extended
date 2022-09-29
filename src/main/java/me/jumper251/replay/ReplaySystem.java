@@ -2,6 +2,7 @@ package me.jumper251.replay;
 
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -57,16 +58,40 @@ public class ReplaySystem extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 
+
+		Long start = System.currentTimeMillis();
+
+		getLogger().info("Loading Replay v" + getDescription().getVersion() + " by " + getDescription().getAuthors().get(0));
+		
+		ConfigManager.loadConfigs();
+		ReplayManager.register();
+		ReplaySaver.register(ConfigManager.USE_DATABASE ? new DatabaseReplaySaver() : new DefaultReplaySaver());
+
+		updater = new Updater();
+		metrics = new Metrics(this, 2188);
+		
+		if (ConfigManager.CLEANUP_REPLAYS > 0) {
+			ReplayCleanup.cleanupReplays();
+		}
+
+//		for(World w : Bukkit.getWorlds()){
+//			worldManger.onWorldLoad(w);
+//		}
+		//TODO : FIGURE /\ THis OUT
+
 		if (Bukkit.getServer().getPluginManager().getPlugin("SlimeWorldManager")!=null){
 			worldManger = new SWMWorldManager();
 			File slimeWorlds = new File("slime_worlds");
 			if (slimeWorlds.exists()&&slimeWorlds.isDirectory()) {
 				File[] files = slimeWorlds.listFiles();
+				getLogger().info(Arrays.toString(files) + " WORLDS");
 				if (files!=null) {
 					for (File file : files) {
 						if (!file.getName().endsWith(".slime"))continue;
+						getLogger().info(file.getName() + " WORLDS");
 						String hashcode = worldManger.uploadWorld(file);
 						if (hashcode==null)continue;
+						getLogger().info(file.getName() + " UPLOAD WORLDS");
 						WorldHandler.WORLD_NAME_HASHCODE.put(file.getName().substring(0,file.getName().length()-6), hashcode);
 					}
 				}
@@ -80,29 +105,10 @@ public class ReplaySystem extends JavaPlugin {
 
 		vanillaWorldManager = new VanillaWorldManager();
 
-		Long start = System.currentTimeMillis();
-
-		getLogger().info("Loading Replay v" + getDescription().getVersion() + " by " + getDescription().getAuthors().get(0));
-		
-		ConfigManager.loadConfigs();
-		ReplayManager.register();
-		ReplaySaver.register(ConfigManager.USE_DATABASE ? new DatabaseReplaySaver() : new DefaultReplaySaver());
-
 		if (ConfigManager.UPLOAD_WORLDS&&ConfigManager.USE_DATABASE){
+
 			getServer().getPluginManager().registerEvents(worldManger.getListener(), this);
 
-		}
-
-
-		updater = new Updater();
-		metrics = new Metrics(this, 2188);
-		
-		if (ConfigManager.CLEANUP_REPLAYS > 0) {
-			ReplayCleanup.cleanupReplays();
-		}
-
-		for(World w : Bukkit.getWorlds()){
-			worldManger.onWorldLoad(w);
 		}
 
 		getLogger().info("Finished (" + (System.currentTimeMillis() - start) + "ms)");

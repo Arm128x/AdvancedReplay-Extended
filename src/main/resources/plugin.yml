@@ -1,9 +1,10 @@
 name: AdvancedReplay
 version: ${project.version}
 main: me.jumper251.replay.ReplaySystem
-author: Jumper251
+authors: [Jumper251, MrF1yn]
 depend: [ProtocolLib]
-load: POSTWORLD
+load: STARTUP
+loadbefore: [BedWars1058, SlimeWorldManager]
 commands:
   replay:
     description: Main Replay command

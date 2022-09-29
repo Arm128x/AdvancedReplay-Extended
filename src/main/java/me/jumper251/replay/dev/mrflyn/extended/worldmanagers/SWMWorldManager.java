@@ -18,6 +18,7 @@ import org.bukkit.World;
 import org.bukkit.event.Listener;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -87,6 +88,7 @@ public class SWMWorldManager implements IWorldManger {
 
     @Override
     public String uploadWorld(File file) {
+        System.out.println("UP WORLD");
         try {
             String hashcode = null;
             byte[] data = null;
@@ -94,13 +96,17 @@ public class SWMWorldManager implements IWorldManger {
             data = Files.readAllBytes(file.toPath());
             hashcode = WorldUtils.hash(data);
 
-            if (hashcode == null) return null;
-            if (data == null)return null;
+            if (hashcode == null){
+                System.out.println("HASH NULL");
+                return null;}
+            if (data == null){
+                System.out.println("data NULL");
+                return null;}
             if (DatabaseRegistry.getDatabase().getService().hasWorld(hashcode)) return hashcode;
             DatabaseRegistry.getDatabase().getService().setWorld(hashcode, file.getName(), data, "slime");
             return hashcode;
         }catch (Exception e){
-            if (!(e instanceof NullPointerException))
+            if (!(e instanceof IOException)&&!(e instanceof NullPointerException))
                 e.printStackTrace();
         }
         return null;

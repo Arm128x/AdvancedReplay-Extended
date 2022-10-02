@@ -47,17 +47,19 @@ public class ReplayListener extends AbstractListener {
 	@EventHandler
 	public void onReplayStop(ReplaySessionFinishEvent e){
 		//TODO: fix
-		String name = e.getPlayer().getWorld().getName();
-		ReplaySystem.getInstance().getLogger().info(name);
+
 		ReplaySystem.getInstance().getLogger().info(WorldHandler.WORLD_WATCHER.toString());
-		if (!WorldHandler.WORLD_WATCHER.containsKey(name))return;
-		WorldHandler.WORLD_WATCHER.put(name, WorldHandler.WORLD_WATCHER.get(name)-1);
-		ReplaySystem.getInstance().getLogger().info(WorldHandler.WORLD_WATCHER.toString());
-		// UNLOAD IF WATCHERS<1;
-		if (WorldHandler.WORLD_WATCHER.get(name)<1){
-			Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
-				ReplaySystem.getInstance().worldManger.unloadWorld(name);
-			});
+		for(String world : e.getReplay().getData().getUsedWorlds()) {
+			ReplaySystem.getInstance().getLogger().info(world);
+			if (!WorldHandler.WORLD_WATCHER.containsKey(world)) continue;
+			WorldHandler.WORLD_WATCHER.put(world, WorldHandler.WORLD_WATCHER.get(world) - 1);
+			ReplaySystem.getInstance().getLogger().info(WorldHandler.WORLD_WATCHER.toString());
+			// UNLOAD IF WATCHERS<1;
+			if (WorldHandler.WORLD_WATCHER.get(world) < 1) {
+				Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), () -> {
+					ReplaySystem.getInstance().worldManger.unloadWorld(world);
+				});
+			}
 		}
 
 	}

@@ -117,7 +117,7 @@ public class RecordingListener extends AbstractListener {
 			}
 
 			if (e.getAction() == Action.LEFT_CLICK_BLOCK && p.getTargetBlock((Set<Material>) null, 5).getType() == Material.FIRE) {
-				LocationData location = LocationData.fromLocation(p.getTargetBlock((Set<Material>) null, 5).getLocation());
+				LocationData location = LocationData.fromLocation(this.recorder.getData(),p.getTargetBlock((Set<Material>) null, 5).getLocation());
 
 				ItemData before = new ItemData(Material.FIRE.getId(), 0);
 				ItemData after = new ItemData(0, 0);
@@ -207,7 +207,7 @@ public class RecordingListener extends AbstractListener {
 		Player p = e.getPlayer();
 		if (recorder.getPlayers().contains(p.getName())) {
 
-			this.packetRecorder.addData(p.getName(), new BedEnterData(LocationData.fromLocation(e.getBed().getLocation())));
+			this.packetRecorder.addData(p.getName(), new BedEnterData(LocationData.fromLocation(recorder.getData(), e.getBed().getLocation())));
 		}
 		
 	}
@@ -283,8 +283,8 @@ public class RecordingListener extends AbstractListener {
 		if (proj.getShooter() instanceof Player) {
 			Player p = (Player)proj.getShooter();
 			if (this.recorder.getPlayers().contains(p.getName())) {
-				LocationData spawn = LocationData.fromLocation(p.getEyeLocation());
-				LocationData velocity = LocationData.fromLocation(proj.getVelocity().toLocation(p.getWorld()));
+				LocationData spawn = LocationData.fromLocation(recorder.getData(), p.getEyeLocation());
+				LocationData velocity = LocationData.fromLocation(recorder.getData(), proj.getVelocity().toLocation(p.getWorld()));
 				
 				this.packetRecorder.addData(p.getName(),  new ProjectileData(spawn, velocity, proj.getType()));
 				this.packetRecorder.addData(p.getName(), NPCManager.copyFromPlayer(p, true, true));
@@ -306,7 +306,7 @@ public class RecordingListener extends AbstractListener {
 	public void onPlace(BlockPlaceEvent e) {
 		Player p = e.getPlayer();
 		if (this.recorder.getPlayers().contains(p.getName())) {
-			LocationData location = LocationData.fromLocation(e.getBlockPlaced().getLocation());
+			LocationData location = LocationData.fromLocation(recorder.getData(), e.getBlockPlaced().getLocation());
 
 
 			ItemData before = new ItemData(e.getBlockReplacedState().getType().getId(), e.getBlockReplacedState().getData().getData());
@@ -328,7 +328,7 @@ public class RecordingListener extends AbstractListener {
 	public void onBreak(BlockBreakEvent e) {
 		Player p = e.getPlayer();
 		if (this.recorder.getPlayers().contains(p.getName())) {
-			LocationData location = LocationData.fromLocation(e.getBlock().getLocation());
+			LocationData location = LocationData.fromLocation(recorder.getData(), e.getBlock().getLocation());
 
 			ItemData before = VersionUtil.isAbove(VersionEnum.V1_13) ? new ItemData(SerializableItemStack.fromMaterial(MaterialBridge.getBlockDataMaterial(e.getBlock()))) : new ItemData(e.getBlock().getType().getId(), e.getBlock().getData());
 			ItemData after = new ItemData(0, 0);
@@ -343,7 +343,7 @@ public class RecordingListener extends AbstractListener {
 	public void onFill(PlayerBucketFillEvent e) {
 		Player p = e.getPlayer();
 		if (this.recorder.getPlayers().contains(p.getName())) {
-			LocationData location = LocationData.fromLocation(e.getBlockClicked().getLocation());
+			LocationData location = LocationData.fromLocation(recorder.getData(), e.getBlockClicked().getLocation());
 
 			ItemData before = new ItemData(e.getBlockClicked().getState().getType().getId(), e.getBlockClicked().getState().getData().getData());
 			ItemData after = new ItemData(0, 0);
@@ -367,7 +367,7 @@ public class RecordingListener extends AbstractListener {
 		Player p = e.getPlayer();
 		if (this.recorder.getPlayers().contains(p.getName())) {
 			Block block = e.getBlockClicked().getRelative(e.getBlockFace());
-			LocationData location = LocationData.fromLocation(block.getLocation());
+			LocationData location = LocationData.fromLocation(recorder.getData(), block.getLocation());
 			
 			ItemData before = new ItemData(block.getType().getId(), block.getData());
 			ItemData after = new ItemData(e.getBucket() == Material.LAVA_BUCKET ? 11 : 9, 0);
@@ -384,7 +384,7 @@ public class RecordingListener extends AbstractListener {
 	public void onWorldChange(PlayerChangedWorldEvent e) {
 		Player p = e.getPlayer();
 		if (this.recorder.getPlayers().contains(p.getName())) {
-			LocationData location = LocationData.fromLocation(p.getLocation());
+			LocationData location = LocationData.fromLocation(recorder.getData(), p.getLocation());
 			
 			
 			this.packetRecorder.addData(p.getName(), new WorldChangeData(location));

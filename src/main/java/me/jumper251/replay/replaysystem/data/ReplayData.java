@@ -1,10 +1,10 @@
 package me.jumper251.replay.replaysystem.data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import me.jumper251.replay.filesystem.ConfigManager;
+import me.jumper251.replay.replaysystem.data.types.LocationData;
 import me.jumper251.replay.replaysystem.recording.PlayerWatcher;
 import me.jumper251.replay.replaysystem.recording.optimization.ReplayQuality;
 
@@ -27,14 +27,18 @@ public class ReplayData implements Serializable{
 	
 	private ReplayQuality quality;
 
-	private String worldHashCode;
+	private List<String> allUsedWorlds;
 
-	private String worldName;
+	@Override
+	public String toString(){
+		String s = actions.toString()+" ## "+ allUsedWorlds.toString();
+		return s;
+	}
 	
 	public ReplayData() {
 		this.actions = new HashMap<Integer, List<ActionData>>();
 		this.watchers = new HashMap<String, PlayerWatcher>();
-		
+		this.allUsedWorlds = new ArrayList<>();
 		this.quality = ConfigManager.QUALITY;
 	}
 	
@@ -57,6 +61,15 @@ public class ReplayData implements Serializable{
 	public ReplayQuality getQuality() {
 		return quality;
 	}
+
+	public void addUsedWorld(String worldWithHashcode){
+		if (!allUsedWorlds.contains(worldWithHashcode))
+			this.allUsedWorlds.add(worldWithHashcode);
+	}
+
+	public List<String> getUsedWorlds(){
+		return new ArrayList<>(this.allUsedWorlds);
+	}
 	
 	public HashMap<Integer, List<ActionData>> getActions() {
 		return actions;
@@ -76,21 +89,5 @@ public class ReplayData implements Serializable{
 		} else {
 			return null;
 		}
-	}
-
-	public String getWorldHashCode() {
-		return worldHashCode;
-	}
-
-	public void setWorldHashCode(String worldHashCode) {
-		this.worldHashCode = worldHashCode;
-	}
-
-	public String getWorldName() {
-		return worldName;
-	}
-
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
 	}
 }

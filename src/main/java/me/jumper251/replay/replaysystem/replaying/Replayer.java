@@ -1,5 +1,6 @@
 package me.jumper251.replay.replaysystem.replaying;
 
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -53,10 +54,16 @@ public class Replayer {
 	private Player watcher;
 	
 	private Replay replay;
-
-	private String spawnWorld;
 	
 	private BukkitRunnable run;
+
+	private boolean foundAllWorlds = true;
+
+	public boolean isAllWorldsFound(){
+		return foundAllWorlds;
+	}
+
+
 	
 	private int currentTicks;
 	private double speed, tmpTicks;
@@ -82,70 +89,84 @@ public class Replayer {
 	
 	
 	public void start() {
-		System.out.println("REPLAY STARTED: "+this.replay.getId());
+		Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), () -> {
+			ReplayData data = this.replay.getData();
 
-		ReplayData data = this.replay.getData();
-		int duration = data.getDuration();
+			for(String worlds : data.getUsedWorlds()){
+				String[] sec = worlds.split("_");
+				File file = ReplaySystem.getInstance().worldManger.downloadWorld(sec[sec.length-1]);
+				if (file==null)this.foundAllWorlds = false;
 
-		Location start = watcher.getLocation();
-		SpawnData tempSpawnData;
-
-		this.session.setStart(watcher.getLocation());
-
-		if (data.getActions().containsKey(0)) {
-			for (ActionData startData : data.getActions().get(0)) {
-				if (startData.getPacketData() instanceof SpawnData) {
-					tempSpawnData = (SpawnData) startData.getPacketData();
-					WorldHandler.onReplayStart(this, tempSpawnData);
-					break;
-				}
 			}
-		} else {
-			Optional<SpawnData> spawnData1 = findFirstSpawn(data);
-			if (spawnData1.isPresent()){
-				tempSpawnData = spawnData1.get();
-				WorldHandler.onReplayStart(this, tempSpawnData);
-			}
-		}
 
 
-		this.session.startSession(start);
-		
-		this.speed = 1;
 
-		this.run = new BukkitRunnable() {
-			@Override
-			public void run() {
-				if (Replayer.this.spawnWorld==null)return;
-				if (Replayer.this.paused) return;
+			Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), () -> {
+				System.out.println("REPLAY STARTED: " + this.replay.getId());
 
-				Replayer.this.tmpTicks += speed;
-				if (Replayer.this.tmpTicks % 1 != 0) return;
-				
-				if (currentTicks < duration) {
 
-					executeTick(currentTicks++, false);
 
-					if ((currentTicks + 2) < duration && speed == 2)  {
-						executeTick(currentTicks++, false);
+				int duration = data.getDuration();
 
+				Location start = watcher.getLocation();
+				SpawnData tempSpawnData;
+
+				this.session.setStart(watcher.getLocation());
+
+				if (data.getActions().containsKey(0)) {
+					for (ActionData startData : data.getActions().get(0)) {
+						if (startData.getPacketData() instanceof SpawnData) {
+							tempSpawnData = (SpawnData) startData.getPacketData();
+							WorldHandler.onReplayStart(this, tempSpawnData);
+							break;
+						}
 					}
-					
-					updateXPBar();
 				} else {
-					
-					stop();
+					Optional<SpawnData> spawnData1 = findFirstSpawn(data);
+					if (spawnData1.isPresent()) {
+						tempSpawnData = spawnData1.get();
+						WorldHandler.onReplayStart(this, tempSpawnData);
+					}
 				}
-			}
-		};
-		executeTick(0, false);
-		this.run.runTaskTimerAsynchronously(ReplaySystem.getInstance(), 1, 1);
+
+
+				this.session.startSession(start);
+
+				this.speed = 1;
+
+				this.run = new BukkitRunnable() {
+					@Override
+					public void run() {
+						if (Replayer.this.paused) return;
+
+						Replayer.this.tmpTicks += speed;
+						if (Replayer.this.tmpTicks % 1 != 0) return;
+
+						if (currentTicks < duration) {
+
+							executeTick(currentTicks++, false);
+
+							if ((currentTicks + 2) < duration && speed == 2) {
+								executeTick(currentTicks++, false);
+
+							}
+
+							updateXPBar();
+						} else {
+
+							stop();
+						}
+					}
+				};
+				executeTick(0, false);
+				this.run.runTaskTimerAsynchronously(ReplaySystem.getInstance(), 1, 1);
+			});
+		});
 
 	}
 	
 	public void executeTick(int tick, boolean reversed) {
 		if(Replayer.this.paused)return;
-		if (Replayer.this.spawnWorld==null)return;
 		ReplayData data = this.replay.getData();
 		if (!data.getActions().isEmpty() && data.getActions().containsKey(tick)) {
 
@@ -278,13 +299,5 @@ public class Replayer {
 		if (message != null) {
 			this.watcher.sendMessage(ReplaySystem.PREFIX + message);
 		}
-	}
-
-	public void setSpawnWorld(String spawnWorld){
-		this.spawnWorld = spawnWorld;
-	}
-
-	public String getSpawnWorld(){
-		return this.spawnWorld;
 	}
 }

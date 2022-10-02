@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 public class SWMListeners implements Listener {
 
@@ -21,10 +22,18 @@ public class SWMListeners implements Listener {
         if (ConfigManager.BLACKLISTED_UPLOAD_WORDLS.contains(e.getWorld().getName()))return;
         Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
            String hashcode = ReplaySystem.getInstance().worldManger.uploadWorld(e.getWorld().getName());
-           if(hashcode==null)return;
-           WorldHandler.WORLD_NAME_HASHCODE.put(e.getWorld().getName(), hashcode);
+//           if(hashcode==null)return;
+           WorldHandler.putNewWorldWithHashcode(e.getWorld().getName(), hashcode);
+           WorldHandler.putNewWorldFalseName(e.getWorld().getName());
+
         });
 //        WorldHandler.WORLD_WATCHER.put(uid, 0);
+    }
+
+    @EventHandler
+    public void onWorldUnload(WorldUnloadEvent e){
+        WorldHandler.WORLD_NAME_HASHCODE.remove(e.getWorld().getName());
+        WorldHandler.WORLD_FALSE_NAME_REAL_NAME.remove(e.getWorld().getName());
     }
 
 

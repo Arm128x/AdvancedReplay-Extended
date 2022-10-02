@@ -214,18 +214,18 @@ public class ReplayingUtils {
 				BedEnterData bed = (BedEnterData) action.getPacketData();
 				
 				if (VersionUtil.isAbove(VersionEnum.V1_14)) {
-					npc.teleport(LocationData.toLocation(bed.getLocation()), true);
+					npc.teleport(LocationData.toLocation(this.replayer,bed.getLocation()), true);
 					
 					npc.setData(new MetadataBuilder(npc.getData())
 							.setPoseField("SLEEPING")
 							.getData());
 					
 					npc.updateMetadata();
-					npc.teleport(LocationData.toLocation(bed.getLocation()), true);
+					npc.teleport(LocationData.toLocation( this.replayer ,bed.getLocation()), true);
 
 					
 				} else {
-					npc.sleep(LocationData.toLocation(bed.getLocation()));
+					npc.sleep(LocationData.toLocation(this.replayer,bed.getLocation()));
 				}
 			}
 			
@@ -255,7 +255,7 @@ public class ReplayingUtils {
 				if (entityData.getAction() == 0) {
 					if (!reversed) {
 					IEntity entity = VersionUtil.isCompatible(VersionEnum.V1_8) ? new PacketEntityOld(EntityType.valueOf(entityData.getType()))  : new PacketEntity(EntityType.valueOf(entityData.getType()));
-					entity.spawn(LocationData.toLocation(entityData.getLocation()), this.replayer.getWatchingPlayer());
+					entity.spawn(LocationData.toLocation(this.replayer,entityData.getLocation()), this.replayer.getWatchingPlayer());
 					replayer.getEntityList().put(entityData.getId(), entity);
 					} else if (replayer.getEntityList().containsKey(entityData.getId())){
 						IEntity ent = replayer.getEntityList().get(entityData.getId());
@@ -269,7 +269,7 @@ public class ReplayingUtils {
 					ent.remove();
 					} else {
 						IEntity entity = VersionUtil.isCompatible(VersionEnum.V1_8) ? new PacketEntityOld(EntityType.valueOf(entityData.getType()))  : new PacketEntity(EntityType.valueOf(entityData.getType()));
-						entity.spawn(LocationData.toLocation(entityData.getLocation()), this.replayer.getWatchingPlayer());
+						entity.spawn(LocationData.toLocation(this.replayer,entityData.getLocation()), this.replayer.getWatchingPlayer());
 						replayer.getEntityList().put(entityData.getId(), entity);
 					}
 				}
@@ -303,7 +303,7 @@ public class ReplayingUtils {
 			
 			if (action.getPacketData() instanceof WorldChangeData) {
 				WorldChangeData worldChange = (WorldChangeData) action.getPacketData();
-				Location loc = LocationData.toLocation(worldChange.getLocation());
+				Location loc = LocationData.toLocation(this.replayer,worldChange.getLocation());
 				
 				npc.despawn();
 				npc.setOrigin(loc);
@@ -346,7 +346,7 @@ public class ReplayingUtils {
 				npc.remove();
 				replayer.getNPCList().remove(action.getName());
 				
-				SpawnData oldSpawnData = new SpawnData(npc.getUuid(), LocationData.fromLocation(npc.getLocation()), signatures.get(action.getName()));
+				SpawnData oldSpawnData = new SpawnData(npc.getUuid(), LocationData.fromLocation0(null,npc.getLocation()), signatures.get(action.getName()));
 				this.lastSpawnActions.addLast(new ActionData(0, ActionType.SPAWN, action.getName(), oldSpawnData));
 				
 				if (action.getType() == ActionType.DESPAWN) {
@@ -444,7 +444,7 @@ public class ReplayingUtils {
 			tabMode = 2;
 			spawnData.setUuid(UUID.randomUUID());
 		}
-		Location spawn = LocationData.toLocation(spawnData.getLocation(), this.replayer.getSpawnWorld());
+		Location spawn = LocationData.toLocation(this.replayer,spawnData.getLocation());
 		INPC npc = !VersionUtil.isCompatible(VersionEnum.V1_8) ? new PacketNPC(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName(), spawn) : new PacketNPCOld(MathUtils.randInt(10000, 20000), spawnData.getUuid(), action.getName(), spawn);
 		this.replayer.getNPCList().put(action.getName(), npc);
 		this.replayer.getReplay().getData().getWatchers().put(action.getName(), new PlayerWatcher(action.getName()));
@@ -485,8 +485,8 @@ public class ReplayingUtils {
 			
 				@Override
 				public void run() {
-					Projectile proj = (Projectile) world.spawnEntity(LocationData.toLocation(projData.getSpawn()), projData.getType());
-					proj.setVelocity(LocationData.toLocation(projData.getVelocity()).toVector());
+					Projectile proj = (Projectile) world.spawnEntity(LocationData.toLocation(replayer, projData.getSpawn()), projData.getType());
+					proj.setVelocity(LocationData.toLocation(replayer,projData.getVelocity()).toVector());
 				
 				}
 			}.runTask(ReplaySystem.getInstance());
@@ -494,7 +494,7 @@ public class ReplayingUtils {
 		
 		if (fishing != null) {			
 			int rndID = MathUtils.randInt(2000, 30000);
-			AbstractPacket packet = VersionUtil.isCompatible(VersionEnum.V1_8) ? FishingUtils.createHookPacketOld(fishing, id, rndID) : FishingUtils.createHookPacket(fishing, id, rndID);	
+			AbstractPacket packet = VersionUtil.isCompatible(VersionEnum.V1_8) ? FishingUtils.createHookPacketOld(this.replayer,fishing, id, rndID) : FishingUtils.createHookPacket(this.replayer,fishing, id, rndID);
 			
 			hooks.put(fishing.getId(), rndID);
 			packet.sendPacket(replayer.getWatchingPlayer());
@@ -502,7 +502,7 @@ public class ReplayingUtils {
 	}
 	
 	private void setBlockChange(BlockChangeData blockChange) {
-		final Location loc = LocationData.toLocation(blockChange.getLocation());
+		final Location loc = LocationData.toLocation(this.replayer ,blockChange.getLocation());
 		
 		if (ConfigManager.WORLD_RESET && ! this.replayer.getBlockChanges().containsKey(loc)) {
 			this.replayer.getBlockChanges().put(loc, blockChange.getBefore());
@@ -550,14 +550,14 @@ public class ReplayingUtils {
 	}
 	
 	private void spawnItemStack(EntityItemData entityData) {
-		final Location loc = LocationData.toLocation(entityData.getLocation());
+		final Location loc = LocationData.toLocation(this.replayer ,entityData.getLocation());
 		
 		new BukkitRunnable() {
 			
 			@Override
 			public void run() {
 				Item item = loc.getWorld().dropItemNaturally(loc, NPCManager.fromID(entityData.getItemData()));
-				item.setVelocity(LocationData.toLocation(entityData.getVelocity()).toVector());
+				item.setVelocity(LocationData.toLocation(replayer ,entityData.getVelocity()).toVector());
 				
 				itemEntities.put(entityData.getId(), item);
 				

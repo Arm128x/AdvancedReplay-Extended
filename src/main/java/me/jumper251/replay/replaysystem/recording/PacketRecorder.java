@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.comphenix.protocol.PacketTypeEnum;
+import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
 import me.jumper251.replay.replaysystem.utils.entities.EntityMappings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -175,16 +176,16 @@ public class PacketRecorder extends AbstractListener{
     					LocationData location = null;
 
     					if (VersionUtil.isCompatible(VersionEnum.V1_8)) {
-        					location = new LocationData(oldPacket.getX(), oldPacket.getY(), oldPacket.getZ(), p.getWorld().getName());
+        					location = new LocationData(recorder.getData(), oldPacket.getX(), oldPacket.getY(), oldPacket.getZ(), WorldHandler.WORLD_FALSE_NAME_REAL_NAME.get(p.getWorld().getName()), WorldHandler.WORLD_NAME_HASHCODE.get(p.getWorld().getName()));
         				} else {
-        					location = new LocationData(packet.getX(), packet.getY(), packet.getZ(), p.getWorld().getName());
+        					location = new LocationData(recorder.getData(), packet.getX(), packet.getY(), packet.getZ(), WorldHandler.WORLD_FALSE_NAME_REAL_NAME.get(p.getWorld().getName()), WorldHandler.WORLD_NAME_HASHCODE.get(p.getWorld().getName()));
         				}
             			
             			if ((type == 2 || (VersionUtil.isAbove(VersionEnum.V1_14) && event.getPacket().getEntityTypeModifier().read(0) == EntityType.DROPPED_ITEM)) && !spawnedItems.contains(packet.getEntityID())) {
             				Entity en = packet.getEntity(p.getWorld());
             				if (en != null && en instanceof Item) {
             					Item item = (Item) en;
-            					LocationData velocity = LocationData.fromLocation(item.getVelocity().toLocation(p.getWorld()));
+            					LocationData velocity = LocationData.fromLocation( recorder.getData(),item.getVelocity().toLocation(p.getWorld()));
 
             					addData(p.getName(), new EntityItemData(0, packet.getEntityID(), NPCManager.fromItemStack(item.getItemStack()), location, velocity));
             					
@@ -207,7 +208,7 @@ public class PacketRecorder extends AbstractListener{
 							EntityType livingType = event.getPacket().getEntityTypeModifier().read(0);
 
 							if (EntityMappings.getInstance().getTypeId(livingType.toString()) != 0) {
-								LocationData locationData = new LocationData(packet.getX(), packet.getY(), packet.getZ(), p.getWorld().getName());
+								LocationData locationData = new LocationData(recorder.getData(), packet.getX(), packet.getY(), packet.getZ(), WorldHandler.WORLD_FALSE_NAME_REAL_NAME.get(p.getWorld().getName()), WorldHandler.WORLD_NAME_HASHCODE.get(p.getWorld().getName()));
 
 								if (!spawnedEntities.containsKey(packet.getEntityID())) {
 									EntityData entData = new EntityData(0, packet.getEntityID(), locationData, livingType.toString());
@@ -233,9 +234,9 @@ public class PacketRecorder extends AbstractListener{
             				
             				if (VersionUtil.isCompatible(VersionEnum.V1_8)) {
             					com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntityLiving oldPacket = new com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntityLiving(event.getPacket());
-            					location = new LocationData(oldPacket.getX(), oldPacket.getY(), oldPacket.getZ(), p.getWorld().getName());
+            					location = new LocationData(recorder.getData(), oldPacket.getX(), oldPacket.getY(), oldPacket.getZ(), WorldHandler.WORLD_FALSE_NAME_REAL_NAME.get(p.getWorld().getName()), WorldHandler.WORLD_NAME_HASHCODE.get(p.getWorld().getName()));
             				} else {
-            					location = new LocationData(packet.getX(), packet.getY(), packet.getZ(), p.getWorld().getName());
+            					location = new LocationData(recorder.getData(), packet.getX(), packet.getY(), packet.getZ(), WorldHandler.WORLD_FALSE_NAME_REAL_NAME.get(p.getWorld().getName()), WorldHandler.WORLD_NAME_HASHCODE.get(p.getWorld().getName()));
             				}
 
             				EntityData entData = new EntityData(0, packet.getEntityID(), location, type.toString());

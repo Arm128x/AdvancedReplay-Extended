@@ -2,6 +2,7 @@ package me.jumper251.replay.replaysystem.utils.entities;
 
 import java.util.UUID;
 
+import me.jumper251.replay.replaysystem.replaying.Replayer;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 
@@ -14,8 +15,8 @@ import me.jumper251.replay.utils.VersionUtil.VersionEnum;
 
 public class FishingUtils {
 
-	public static WrapperPlayServerSpawnEntity createHookPacket(FishingData fishing, int throwerID, int entID) {
-		Location loc = LocationData.toLocation(fishing.getLocation());
+	public static WrapperPlayServerSpawnEntity createHookPacket(Replayer replayer, FishingData fishing, int throwerID, int entID) {
+		Location loc = LocationData.toLocation(replayer,fishing.getLocation());
 		
 		WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity();
 		
@@ -42,8 +43,8 @@ public class FishingUtils {
 		return packet;
 	}
 	
-	public static com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntity createHookPacketOld(FishingData fishing, int throwerID, int entID) {
-		Location loc = LocationData.toLocation(fishing.getLocation());
+	public static com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntity createHookPacketOld(Replayer replayer,FishingData fishing, int throwerID, int entID) {
+		Location loc = LocationData.toLocation(replayer,fishing.getLocation());
 		
 		com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntity packet = new com.comphenix.packetwrapper.old.WrapperPlayServerSpawnEntity();
 		

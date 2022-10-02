@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 
 import me.jumper251.replay.com.twmacinta.util.MD5;
+import me.jumper251.replay.dev.mrflyn.extended.Bw1058Support;
 import me.jumper251.replay.dev.mrflyn.extended.VanillaListeners;
 import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.IWorldManger;
@@ -40,6 +41,8 @@ public class ReplaySystem extends JavaPlugin {
 	public static Metrics metrics;
 	public IWorldManger worldManger;
 	public VanillaWorldManager vanillaWorldManager;
+	public Bw1058Support bw1058Support;
+
 	
 	public final static String PREFIX = "§8[§3Replay§8] §r§7";
 
@@ -58,6 +61,11 @@ public class ReplaySystem extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 
+
+		if (getServer().getPluginManager().getPlugin("BedWars1058")!=null){
+			bw1058Support = new Bw1058Support();
+			getLogger().info("Initiating BW1058 Support.");
+		}
 
 		Long start = System.currentTimeMillis();
 

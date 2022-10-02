@@ -45,8 +45,8 @@ public class SWMWorldManager implements IWorldManger {
         if (ConfigManager.BLACKLISTED_UPLOAD_WORDLS.contains(world.getName()))return;
 //        Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
             String hashcode = ReplaySystem.getInstance().worldManger.uploadWorld(world.getName());
-            if(hashcode==null)return;
-            WorldHandler.WORLD_NAME_HASHCODE.put(world.getName(), hashcode);
+//            if(hashcode==null)return;
+            WorldHandler.putNewWorldWithHashcode(world.getName(), hashcode);
 //        try {
 //            ReplaySystem.getInstance().getLogger().info("Sleeping");
 //            Thread.sleep(3000L);
@@ -103,7 +103,7 @@ public class SWMWorldManager implements IWorldManger {
                 System.out.println("data NULL");
                 return null;}
             if (DatabaseRegistry.getDatabase().getService().hasWorld(hashcode)) return hashcode;
-            DatabaseRegistry.getDatabase().getService().setWorld(hashcode, file.getName(), data, "slime");
+            DatabaseRegistry.getDatabase().getService().setWorld(hashcode, file.getName().substring(0,file.getName().length()-6), data, "slime");
             return hashcode;
         }catch (Exception e){
             if (!(e instanceof IOException)&&!(e instanceof NullPointerException))
@@ -115,6 +115,10 @@ public class SWMWorldManager implements IWorldManger {
     @Override
     public File downloadWorld(String hashcode) {
         try {
+            for(File file : new File(ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds").listFiles()){
+                if (!file.getName().endsWith(".slime"))continue;
+                if (file.getName().contains(hashcode))return file;
+            }
             RawWorld worldData = DatabaseRegistry.getDatabase().getService().getWorld(hashcode);
             if (worldData == null) {
                 LogUtils.log("(downloadWorld) Unable to load world from database. (Doesn't exist)");
@@ -213,18 +217,43 @@ public class SWMWorldManager implements IWorldManger {
     @Override
     public void onReplayStart(Replayer replayer, SpawnData spawnData) {
         String destination = ReplaySystem.getInstance().getDataFolder()+"/downloadedWorlds";
-        String replayWorld = replayer.getReplay().getData().getWorldName()+"_"+replayer.getReplay().getData().getWorldHashCode();
-        ReplaySystem.getInstance().getLogger().info("onReplayStart");
+        String replayWorld = spawnData.getLocation().getWorld()+"_"+spawnData.getLocation().getWorldHashCode();
         replayer.setPaused(true);
-        replayer.setSpawnWorld(replayer.getReplay().getData().getWorldName());
+        if(replayer.isAllWorldsFound()){
+            //TODO :POSSIBLE ERR REPLAY PAUSE
+
+            for(String world : replayer.getReplay().getData().getUsedWorlds()){
+                if (world.equals(replayWorld))continue;
+
+                //check if world is already loaded
+                if (Bukkit.getWorld(world)!=null){
+                    worldWatcherIncrement(world, 1);
+                    continue;
+                }
+                Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
+                    SlimeWorld sWorld = loadWorldSlime(new File(destination,world+".slime"));
+                    Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
+                        slime.generateWorld(sWorld);
+                        worldWatcherIncrement(world, 1);
+                    });
+                });
+
+            }
+
+
+        }
+
+
+
+        ReplaySystem.getInstance().getLogger().info("onReplayStart");
+
         //check if world is already loaded
 
         if (Bukkit.getWorld(replayWorld)!=null){
             //TODO: add number to watching replays in this world.
             worldWatcherIncrement(replayWorld, 1);
             ReplaySystem.getInstance().getLogger().info("onReplayStart: worldLoadedAlready");
-            replayer.setSpawnWorld(replayWorld);
-            replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation(), replayWorld));
+            replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
             replayer.setPaused(false);
             return;
         }
@@ -236,8 +265,7 @@ public class SWMWorldManager implements IWorldManger {
                 SlimeWorld world = loadWorldSlime(new File(destination,replayWorld+".slime"));
                 Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
                     slime.generateWorld(world);
-                    replayer.setSpawnWorld(replayWorld);
-                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation(), replayWorld));
+                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer,spawnData.getLocation()));
                     worldWatcherIncrement(replayWorld, 1);
                     replayer.setPaused(false);
                 });
@@ -250,21 +278,19 @@ public class SWMWorldManager implements IWorldManger {
             ReplaySystem.getInstance().worldManger
                     .loadWorld(new File(destination + "/" + replayWorld));
             worldWatcherIncrement(replayWorld, 1);
-            replayer.setSpawnWorld(replayWorld);
-            replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation(), replayWorld));
+            replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
             replayer.setPaused(false);
             return;
         }
         //download world from database async
         Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld");
-            File file = ReplaySystem.getInstance().worldManger.downloadWorld(replayer.getReplay().getData().getWorldHashCode());
+            File file = ReplaySystem.getInstance().worldManger.downloadWorld(spawnData.getLocation().getWorldHashCode());
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done");
             if (file==null){
                 //TODO: attempt unsafe world loading
                 Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
-                    replayer.setSpawnWorld(spawnData.getLocation().getWorld());
-                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation()));
+                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
                     replayer.setPaused(false);
                 });
                 return;
@@ -274,8 +300,7 @@ public class SWMWorldManager implements IWorldManger {
                     ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done vanilla");
                     ReplaySystem.getInstance().worldManger.loadWorld(file);
                     worldWatcherIncrement(replayWorld, 1);
-                    replayer.setSpawnWorld(replayWorld);
-                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation(), replayWorld));
+                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer,spawnData.getLocation()));
                     replayer.setPaused(false);
                 });
                 return;
@@ -288,8 +313,7 @@ public class SWMWorldManager implements IWorldManger {
                 slime.generateWorld(w);
                 ReplaySystem.getInstance().getLogger().info("onReplayStart: loadWorld slime done");
                 worldWatcherIncrement(replayWorld, 1);
-                replayer.setSpawnWorld(replayWorld);
-                replayer.getWatchingPlayer().teleport(LocationData.toLocation(spawnData.getLocation(), replayWorld));
+                replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
                 replayer.setPaused(false);
             });
         });

@@ -37,7 +37,7 @@ public class ReplaySystem extends JavaPlugin {
 	
 	public static ReplaySystem instance;
 	
-	public static Updater updater;
+//	public static Updater updater;
 	public static Metrics metrics;
 	public IWorldManger worldManger;
 	public VanillaWorldManager vanillaWorldManager;
@@ -75,7 +75,7 @@ public class ReplaySystem extends JavaPlugin {
 		ReplayManager.register();
 		ReplaySaver.register(ConfigManager.USE_DATABASE ? new DatabaseReplaySaver() : new DefaultReplaySaver());
 
-		updater = new Updater();
+//		updater = new Updater();
 		metrics = new Metrics(this, 2188);
 		
 		if (ConfigManager.CLEANUP_REPLAYS > 0) {

@@ -324,10 +324,10 @@ public class ReplayListener extends AbstractListener {
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		
-		if(ConfigManager.UPDATE_NOTIFY){
-			if(ReplaySystem.updater.isVersionAvailable() && p.hasPermission("replay.admin")){
-				p.sendMessage(ReplaySystem.PREFIX + "An update is available: https://www.spigotmc.org/resources/advancedreplay-1-8-1-15.52849/");
-			}
-		}
+//		if(ConfigManager.UPDATE_NOTIFY){
+//			if(ReplaySystem.updater.isVersionAvailable() && p.hasPermission("replay.admin")){
+//				p.sendMessage(ReplaySystem.PREFIX + "An update is available: https://www.spigotmc.org/resources/advancedreplay-1-8-1-15.52849/");
+//			}
+//		}
 	}
 }

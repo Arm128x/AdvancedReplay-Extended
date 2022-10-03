@@ -99,8 +99,6 @@ public class ReplaySession {
 		}
 		
 		this.packetListener.unregister();
-		ReplaySessionFinishEvent finishEvent = new ReplaySessionFinishEvent(this.replayer.getReplay(), player, this.replayer);
-		Bukkit.getPluginManager().callEvent(finishEvent);
 		new BukkitRunnable() {
 			
 			@Override

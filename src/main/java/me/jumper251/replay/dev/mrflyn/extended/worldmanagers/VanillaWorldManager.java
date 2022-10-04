@@ -75,7 +75,11 @@ public class VanillaWorldManager implements IWorldManger {
 
     @Override
     public File downloadWorld(String hashcode) {
-        for(File file : new File(ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds").listFiles()){
+        File dir = new File(ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds/");
+        if (!dir.exists()||!dir.isDirectory()){
+            dir.mkdirs();
+        }
+        for(File file : dir.listFiles()){
             if (file.getName().endsWith(".slime"))continue;
             if (file.getName().contains(hashcode))return file;
         }

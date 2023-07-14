@@ -11,9 +11,11 @@ import java.util.stream.IntStream;
 
 import com.comphenix.protocol.PacketTypeEnum;
 import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
+import me.jumper251.replay.replaysystem.data.types.*;
 import me.jumper251.replay.replaysystem.utils.entities.EntityMappings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -43,17 +45,6 @@ import com.comphenix.protocol.wrappers.EnumWrappers.PlayerDigType;
 import me.jumper251.replay.ReplaySystem;
 import me.jumper251.replay.filesystem.ConfigManager;
 import me.jumper251.replay.listener.AbstractListener;
-import me.jumper251.replay.replaysystem.data.types.AnimationData;
-import me.jumper251.replay.replaysystem.data.types.EntityActionData;
-import me.jumper251.replay.replaysystem.data.types.EntityData;
-import me.jumper251.replay.replaysystem.data.types.EntityItemData;
-import me.jumper251.replay.replaysystem.data.types.EntityMovingData;
-import me.jumper251.replay.replaysystem.data.types.FishingData;
-import me.jumper251.replay.replaysystem.data.types.LocationData;
-import me.jumper251.replay.replaysystem.data.types.MetadataUpdate;
-import me.jumper251.replay.replaysystem.data.types.MovingData;
-import me.jumper251.replay.replaysystem.data.types.PacketData;
-import me.jumper251.replay.replaysystem.data.types.VelocityData;
 import me.jumper251.replay.replaysystem.recording.optimization.ReplayOptimizer;
 import me.jumper251.replay.replaysystem.utils.NPCManager;
 import me.jumper251.replay.utils.VersionUtil;
@@ -249,6 +240,14 @@ public class PacketRecorder extends AbstractListener{
             			}
             			
             		}
+
+					if(event.getPacketType()==PacketType.Play.Server.NAMED_SOUND_EFFECT){
+						Sound sound = event.getPacket().getSoundEffects().read(0);
+						double x = p.getLocation().getX();
+						double y = p.getLocation().getY();
+						double z = p.getLocation().getZ();
+						addData(p.getName(), new SoundData(sound, x, y, z, event.getPacket().getFloat().read(0), event.getPacket().getFloat().read(1)));
+					}
             		
             		if (event.getPacketType() == PacketType.Play.Server.ENTITY_DESTROY) {
             			WrapperPlayServerEntityDestroy packet = new WrapperPlayServerEntityDestroy(event.getPacket());

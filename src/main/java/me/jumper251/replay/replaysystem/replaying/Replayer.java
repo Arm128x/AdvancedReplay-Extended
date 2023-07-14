@@ -36,7 +36,6 @@ import me.jumper251.replay.replaysystem.data.ActionData;
 import me.jumper251.replay.replaysystem.data.ActionType;
 import me.jumper251.replay.replaysystem.data.ReplayData;
 import me.jumper251.replay.replaysystem.data.types.ItemData;
-import me.jumper251.replay.replaysystem.data.types.LocationData;
 import me.jumper251.replay.replaysystem.data.types.SpawnData;
 import me.jumper251.replay.replaysystem.utils.entities.IEntity;
 import me.jumper251.replay.replaysystem.utils.entities.INPC;
@@ -94,7 +93,12 @@ public class Replayer {
 
 			for(String worlds : data.getUsedWorlds()){
 				String[] sec = worlds.split("_");
-				File file = ReplaySystem.getInstance().worldManger.downloadWorld(sec[sec.length-1]);
+				int hashIndex = sec.length-1;
+				String worldName = "";
+				for(int i = 0; i < hashIndex; i++){
+					worldName = worldName + sec[i];
+				}
+				File file = ReplaySystem.getInstance().worldManger.downloadWorld(sec[hashIndex], worldName);
 				if (file==null)this.foundAllWorlds = false;
 
 			}

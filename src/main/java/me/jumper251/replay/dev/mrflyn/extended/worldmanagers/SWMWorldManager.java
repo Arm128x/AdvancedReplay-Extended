@@ -71,8 +71,6 @@ public class SWMWorldManager implements IWorldManger {
             } else if (slime.getLoader("mongodb").worldExists(name)) {
                 data = slime.getLoader("mongodb").loadWorld(name, true);
                 hashcode = WorldUtils.hash(data);
-            }else {
-                return ReplaySystem.getInstance().vanillaWorldManager.uploadWorld(name);
             }
             if (hashcode == null) return null;
             if (data == null)return null;
@@ -113,7 +111,7 @@ public class SWMWorldManager implements IWorldManger {
     }
 
     @Override
-    public File downloadWorld(String hashcode) {
+    public File downloadWorld(String hashcode, String name) {
         try {
             File dir = new File(ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds/");
             if (!dir.exists()||!dir.isDirectory()){
@@ -129,12 +127,10 @@ public class SWMWorldManager implements IWorldManger {
                 return null;
             }
             if (worldData.data == null || worldData.name == null || worldData.hashcode == null || worldData.type == null) {
-                LogUtils.log("(downloadWorld) Unable to load world from database. (Missing data");
+                LogUtils.log("(downloadWorld) Unable to load world from database. (Missing data)");
                 return null;
             }
-            if (worldData.type.equals("vanilla")){
-                return ReplaySystem.getInstance().vanillaWorldManager.downloadWorld(hashcode);
-            }
+
             String destination = ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds" + "/" + worldData.name + "_" + worldData.hashcode;
             File file = new File(Paths.get(destination + ".slime").toUri());
             if (!file.exists()){
@@ -161,9 +157,6 @@ public class SWMWorldManager implements IWorldManger {
                 LogUtils.log("(downloadWorldFromName) Unable to load world from database. (Missing data");
                 return null;
             }
-            if (worldData.type.equals("vanilla")){
-                return ReplaySystem.getInstance().vanillaWorldManager.downloadWorldFromName(name);
-            }
             String destination = ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds" + "/" + worldData.name + "_" + worldData.hashcode;
             return new File(Files.write(Paths.get(destination + ".slime"), worldData.data).toUri());
         } catch (Exception e) {
@@ -172,16 +165,7 @@ public class SWMWorldManager implements IWorldManger {
         return null;
     }
 
-    @Override
-    public void loadWorld(File file) {
-        try {
-            if (!file.getName().endsWith(".slime")) {
-                ReplaySystem.getInstance().vanillaWorldManager.loadWorld(file);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
+
 
     public SlimeWorld loadWorldSlime(File file) {
         try {
@@ -195,6 +179,7 @@ public class SWMWorldManager implements IWorldManger {
             spm.setBoolean(SlimeProperties.ALLOW_MONSTERS, false);
             spm.setString(SlimeProperties.DIFFICULTY, "easy");
             spm.setBoolean(SlimeProperties.PVP, true);
+            //TODO: BUG
             String name = file.getName().replace(".slime", "");
             return LoaderUtils.deserializeWorld(slime.getLoader("file"), name, data, spm, true);
         } catch (Exception e) {
@@ -276,35 +261,15 @@ public class SWMWorldManager implements IWorldManger {
             });
             return;
         }
-        else if (WorldUtils.doesFolderExists(replayWorld, destination)) {
-            //TODO: loadWorld
-            ReplaySystem.getInstance().getLogger().info("onReplayStart: loadWorldVanilla");
-            ReplaySystem.getInstance().worldManger
-                    .loadWorld(new File(destination + "/" + replayWorld));
-            worldWatcherIncrement(replayWorld, 1);
-            replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
-            replayer.setPaused(false);
-            return;
-        }
         //download world from database async
-        Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
+        Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), () -> {
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld");
-            File file = ReplaySystem.getInstance().worldManger.downloadWorld(spawnData.getLocation().getWorldHashCode());
+            File file = ReplaySystem.getInstance().worldManger.downloadWorld(spawnData.getLocation().getWorldHashCode(), spawnData.getLocation().getWorld());
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done");
             if (file==null){
                 //TODO: attempt unsafe world loading
                 Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
                     replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer, spawnData.getLocation()));
-                    replayer.setPaused(false);
-                });
-                return;
-            }
-            if (!file.getName().endsWith(".slime")) {
-                Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), () -> {
-                    ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done vanilla");
-                    ReplaySystem.getInstance().worldManger.loadWorld(file);
-                    worldWatcherIncrement(replayWorld, 1);
-                    replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer,spawnData.getLocation()));
                     replayer.setPaused(false);
                 });
                 return;

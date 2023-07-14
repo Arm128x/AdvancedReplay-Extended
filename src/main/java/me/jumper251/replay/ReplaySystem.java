@@ -6,17 +6,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 
-import me.jumper251.replay.com.twmacinta.util.MD5;
 import me.jumper251.replay.dev.mrflyn.extended.Bw1058Support;
-import me.jumper251.replay.dev.mrflyn.extended.VanillaListeners;
 import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.IWorldManger;
 import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.SWMWorldManager;
-import me.jumper251.replay.dev.mrflyn.extended.worldmanagers.VanillaWorldManager;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -29,7 +23,6 @@ import me.jumper251.replay.replaysystem.Replay;
 import me.jumper251.replay.replaysystem.utils.ReplayCleanup;
 import me.jumper251.replay.utils.Metrics;
 import me.jumper251.replay.utils.ReplayManager;
-import me.jumper251.replay.utils.Updater;
 
 
 public class ReplaySystem extends JavaPlugin {
@@ -40,7 +33,6 @@ public class ReplaySystem extends JavaPlugin {
 //	public static Updater updater;
 	public static Metrics metrics;
 	public IWorldManger worldManger;
-	public VanillaWorldManager vanillaWorldManager;
 	public Bw1058Support bw1058Support;
 
 	
@@ -82,12 +74,12 @@ public class ReplaySystem extends JavaPlugin {
 			ReplayCleanup.cleanupReplays();
 		}
 
-//		for(World w : Bukkit.getWorlds()){
-//			worldManger.onWorldLoad(w);
-//		}
-		//TODO : FIGURE /\ THis OUT
 
-		if (Bukkit.getServer().getPluginManager().getPlugin("SlimeWorldManager")!=null){
+		if (Bukkit.getServer().getPluginManager().getPlugin("SlimeWorldManager")==null) {
+			getLogger().severe("SlimeWorldManager Required!");
+			Bukkit.getPluginManager().disablePlugin(this);
+			return;
+		}
 			worldManger = new SWMWorldManager();
 			File slimeWorlds = new File("slime_worlds");
 			if (slimeWorlds.exists()&&slimeWorlds.isDirectory()) {
@@ -105,13 +97,7 @@ public class ReplaySystem extends JavaPlugin {
 				}
 			}
 
-		}else {
-			worldManger = new VanillaWorldManager();
-		}
 
-
-
-		vanillaWorldManager = new VanillaWorldManager();
 
 		if (ConfigManager.UPLOAD_WORLDS&&ConfigManager.USE_DATABASE){
 

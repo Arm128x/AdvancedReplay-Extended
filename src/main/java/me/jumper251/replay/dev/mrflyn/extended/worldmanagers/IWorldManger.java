@@ -20,14 +20,13 @@ public interface IWorldManger {
 
     //call this to download a world from the db, using world's hashcode.
     //call async to save performance
-    File downloadWorld(String hashcode);
+    File downloadWorld(String hashcode, String name);
 
     //call this to download a world from the db, using world's name. (unsafe)
     //call async to save performance
     File downloadWorldFromName(String name);
 
     //call this to load the world from a directory must be called in sync.
-    void loadWorld(File folder);
 
     void unloadWorld(String name);
 

@@ -189,6 +189,7 @@ public class Recorder {
 					ActionData invData = new ActionData(0, ActionType.PACKET, player.getName(), NPCManager.copyFromPlayer(player, true, true));
 					addData(first ? 0 : currentTick, invData);
 				}
+
 			}.runTaskAsynchronously(ReplaySystem.getInstance());
 		}
 		

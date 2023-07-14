@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
+import com.comphenix.packetwrapper.*;
 import me.jumper251.replay.replaysystem.data.types.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -28,10 +28,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Projectile;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.comphenix.packetwrapper.AbstractPacket;
-import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
-import com.comphenix.packetwrapper.WrapperPlayServerEntityEquipment;
-import com.comphenix.packetwrapper.WrapperPlayServerEntityVelocity;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
@@ -154,6 +150,12 @@ public class ReplayingUtils {
 						.set("name", action.getName())
 						.set("message", chatData.getMessage())
 						.build());
+			}
+
+			if (action.getPacketData() instanceof  SoundData){
+				SoundData soundData = (SoundData) action.getPacketData();
+				replayer.getWatchingPlayer().playSound(new Location(replayer.getWatchingPlayer().getWorld(), soundData.getX(), soundData.getY(), soundData.getZ()),
+						soundData.getSound(), soundData.getVolume(), soundData.getPitch());
 			}
 
 			if (action.getPacketData() instanceof InvData) {

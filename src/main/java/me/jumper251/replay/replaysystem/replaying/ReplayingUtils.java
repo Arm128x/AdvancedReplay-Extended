@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.comphenix.packetwrapper.*;
+import com.comphenix.protocol.ProtocolLibrary;
 import me.jumper251.replay.replaysystem.data.types.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -154,8 +155,11 @@ public class ReplayingUtils {
 
 			if (action.getPacketData() instanceof  SoundData){
 				SoundData soundData = (SoundData) action.getPacketData();
-				replayer.getWatchingPlayer().playSound(new Location(replayer.getWatchingPlayer().getWorld(), soundData.getX(), soundData.getY(), soundData.getZ()),
-						soundData.getSound(), soundData.getVolume(), soundData.getPitch());
+				try {
+					ProtocolLibrary.getProtocolManager().sendServerPacket(replayer.getWatchingPlayer(), soundData.getPacket());
+				}catch (Exception e){
+
+				}
 			}
 
 			if (action.getPacketData() instanceof InvData) {

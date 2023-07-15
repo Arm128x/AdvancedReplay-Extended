@@ -1,5 +1,7 @@
 package me.jumper251.replay.replaysystem.data.types;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Sound;
 
 public class SoundData extends PacketData {
@@ -9,23 +11,23 @@ public class SoundData extends PacketData {
 	 */
 	private static final long serialVersionUID = -5227638148471461255L;
 
-	private Sound sound;
+	private String sound;
 
 	private float volume;
 
-	private float pitch;
+	private int seed;
 
-	private double x;
-	private double y;
-	private double z;
+	private int x;
+	private int y;
+	private int z;
 
-	public SoundData(Sound sound, double x, double y, double z, float v, float p) {
+	public SoundData(String sound, int x, int y, int z, float v, int seed) {
 		this.sound = sound;
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.volume = v;
-		this.pitch = p;
+		this.seed = seed;
 
 	}
 
@@ -41,7 +43,7 @@ public class SoundData extends PacketData {
 		return z;
 	}
 
-	public Sound getSound() {
+	public String getSound() {
 		return sound;
 	}
 
@@ -49,7 +51,20 @@ public class SoundData extends PacketData {
 		return volume;
 	}
 
-	public float getPitch() {
-		return pitch;
+	public float getSeed() {
+		return seed;
 	}
+
+	public PacketContainer getPacket(){
+		PacketContainer packet = new PacketContainer(PacketType.Play.Server.NAMED_SOUND_EFFECT);
+		packet.getStrings().write(0, sound);
+		packet.getIntegers().write(0, x)
+				.write(1, y)
+				.write(2, z)
+				.write(3, seed);
+		packet.getFloat().write(0, volume);
+		return packet;
+	}
+
+
 }

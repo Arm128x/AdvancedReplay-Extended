@@ -327,8 +327,7 @@ public class RecordingListener extends AbstractListener {
 		}
 
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	@EventHandler (ignoreCancelled = true, priority = EventPriority.MONITOR)
 	public void onBreak(BlockBreakEvent e) {
 		Player p = e.getPlayer();

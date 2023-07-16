@@ -114,6 +114,7 @@ public class Recorder {
 					for (IReplayHook hook : ReplayAPI.getInstance().getHookManager().getHooks()) {
 						for (String names : players) {
 							List<PacketData> customList = hook.onRecord(names);
+							if(customList==null)continue;
 							customList.stream().filter(Objects::nonNull).forEach(customData -> {
 								ActionData customAction = new ActionData(currentTick, ActionType.CUSTOM, names, customData);
 								addData(currentTick, customAction);

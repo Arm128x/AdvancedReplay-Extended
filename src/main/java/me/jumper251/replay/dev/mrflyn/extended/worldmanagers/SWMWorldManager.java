@@ -131,7 +131,7 @@ public class SWMWorldManager implements IWorldManger {
                 return null;
             }
 
-            String destination = ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds" + "/" + worldData.name + "_" + worldData.hashcode;
+            String destination = ReplaySystem.getInstance().getDataFolder() + "/downloadedWorlds" + "/" + name + "_" + worldData.hashcode;
             File file = new File(Paths.get(destination + ".slime").toUri());
             if (!file.exists()){
                 file.getParentFile().mkdirs();

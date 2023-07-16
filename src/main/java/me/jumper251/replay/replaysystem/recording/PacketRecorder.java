@@ -55,8 +55,8 @@ public class PacketRecorder extends AbstractListener {
 
     private static final List<PacketType> RECORDED_PACKETS = new ArrayList<>(Arrays.asList(PacketType.Play.Client.POSITION, PacketType.Play.Client.POSITION_LOOK, PacketType.Play.Client.LOOK, PacketType.Play.Client.ENTITY_ACTION, PacketType.Play.Client.ARM_ANIMATION,
             PacketType.Play.Client.BLOCK_DIG, PacketType.Play.Server.SPAWN_ENTITY, PacketType.Play.Server.ENTITY_DESTROY, PacketType.Play.Server.ENTITY_VELOCITY,
-            PacketType.Play.Server.REL_ENTITY_MOVE, PacketType.Play.Server.REL_ENTITY_MOVE_LOOK, PacketType.Play.Server.ENTITY_LOOK, PacketType.Play.Server.POSITION, PacketType.Play.Server.ENTITY_TELEPORT, PacketType.Play.Server.NAMED_SOUND_EFFECT,
-            PacketType.Play.Server.ENTITY_SOUND, PacketType.Play.Server.CUSTOM_SOUND_EFFECT));
+            PacketType.Play.Server.REL_ENTITY_MOVE, PacketType.Play.Server.REL_ENTITY_MOVE_LOOK, PacketType.Play.Server.ENTITY_LOOK, PacketType.Play.Server.POSITION,
+            PacketType.Play.Server.ENTITY_TELEPORT, PacketType.Play.Server.NAMED_SOUND_EFFECT));
 
     private PacketAdapter packetAdapter;
 

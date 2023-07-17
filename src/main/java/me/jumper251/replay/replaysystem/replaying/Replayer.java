@@ -159,7 +159,9 @@ public class Replayer {
 						}
 					}
 				};
-				executeTick(0, false);
+				if(!this.paused) {
+					executeTick(0, false);
+				}
 				this.run.runTaskTimerAsynchronously(ReplaySystem.getInstance(), 1, 1);
 			});
 		});
@@ -167,7 +169,6 @@ public class Replayer {
 	}
 	
 	public void executeTick(int tick, boolean reversed) {
-		if(Replayer.this.paused)return;
 		ReplayData data = this.replay.getData();
 		if (!data.getActions().isEmpty() && data.getActions().containsKey(tick)) {
 

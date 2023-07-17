@@ -517,7 +517,7 @@ public class ReplayingUtils {
 		
 		new BukkitRunnable() {
 			
-			@SuppressWarnings("deprecation")
+
 			@Override
 			public void run() {
 				if (blockChange.getAfter().getId() == 0 && blockChange.getBefore().getId() != 0 && MaterialBridge.fromID(blockChange.getBefore().getId()) != Material.FIRE && blockChange.getBefore().getId() != 11 && blockChange.getBefore().getId() != 9 && blockChange.getBefore().getId() != 10 && blockChange.getBefore().getId() != 8) {
@@ -539,8 +539,11 @@ public class ReplayingUtils {
 				} else {
 					if (VersionUtil.isCompatible(VersionEnum.V1_13) || VersionUtil.isCompatible(VersionEnum.V1_14) || VersionUtil.isCompatible(VersionEnum.V1_15) || VersionUtil.isCompatible(VersionEnum.V1_16) || VersionUtil.isCompatible(VersionEnum.V1_17) || VersionUtil.isCompatible(VersionEnum.V1_18) || VersionUtil.isCompatible(VersionEnum.V1_19)) {
 						replayer.getWatchingPlayer().sendBlockChange(loc, getBlockMaterial(blockChange.getAfter()), (byte) subId);
+
 					} else {
 						replayer.getWatchingPlayer().sendBlockChange(loc, id, (byte) subId);
+
+
 					}
 				}
 				

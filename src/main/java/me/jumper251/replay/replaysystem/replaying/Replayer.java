@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import me.jumper251.replay.api.Monitor;
-import me.jumper251.replay.api.ReplaySessionStartEvent;
 import me.jumper251.replay.dev.mrflyn.extended.WorldHandler;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -85,7 +85,7 @@ public class Replayer {
 		
 		ReplayHelper.replaySessions.put(watcher.getName(), this);
 	}
-	
+
 	
 	public void start() {
 		Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), () -> {
@@ -94,10 +94,7 @@ public class Replayer {
 			for(String worlds : data.getUsedWorlds()){
 				String[] sec = worlds.split("_");
 				int hashIndex = sec.length-1;
-				String worldName = "";
-				for(int i = 0; i < hashIndex; i++){
-					worldName = worldName + sec[i];
-				}
+				String worldName = StringUtils.join(sec, "_",0,hashIndex);
 				File file = ReplaySystem.getInstance().worldManger.downloadWorld(sec[hashIndex], worldName);
 				if (file==null)this.foundAllWorlds = false;
 

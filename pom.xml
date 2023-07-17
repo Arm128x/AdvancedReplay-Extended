@@ -32,6 +32,8 @@
             <version>1.0</version>
             <systemPath>H:\projectApisSpigot\slimeworldmanager-plugin-2.2.1.jar</systemPath>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>

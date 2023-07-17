@@ -167,7 +167,7 @@ public class SWMWorldManager implements IWorldManger {
 
 
 
-    public SlimeWorld loadWorldSlime(File file) {
+    public SlimeWorld loadWorldSlime(File file, String nameWithHashcode) {
         try {
             byte[] data = Files.readAllBytes(file.toPath());
             SlimePropertyMap spm = new SlimePropertyMap();
@@ -180,8 +180,8 @@ public class SWMWorldManager implements IWorldManger {
             spm.setString(SlimeProperties.DIFFICULTY, "easy");
             spm.setBoolean(SlimeProperties.PVP, true);
             //TODO: BUG
-            String name = file.getName().replace(".slime", "");
-            return LoaderUtils.deserializeWorld(slime.getLoader("file"), name, data, spm, true);
+            if (nameWithHashcode==null)nameWithHashcode = file.getName().replace(".slime", "");
+            return LoaderUtils.deserializeWorld(slime.getLoader("file"), nameWithHashcode, data, spm, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -220,7 +220,7 @@ public class SWMWorldManager implements IWorldManger {
                     continue;
                 }
                 Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
-                    SlimeWorld sWorld = loadWorldSlime(new File(destination,world+".slime"));
+                    SlimeWorld sWorld = loadWorldSlime(new File(destination,world+".slime"), null);
                     Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
                         slime.generateWorld(sWorld);
                         worldWatcherIncrement(world, 1);
@@ -251,7 +251,7 @@ public class SWMWorldManager implements IWorldManger {
             //TODO: loadWorld
             ReplaySystem.getInstance().getLogger().info("onReplayStart: loadWorldSlime");
             Bukkit.getScheduler().runTaskAsynchronously(ReplaySystem.getInstance(), ()->{
-                SlimeWorld world = loadWorldSlime(new File(destination,replayWorld+".slime"));
+                SlimeWorld world = loadWorldSlime(new File(destination,replayWorld+".slime"), null);
                 Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), ()->{
                     slime.generateWorld(world);
                     replayer.getWatchingPlayer().teleport(LocationData.toLocation(replayer,spawnData.getLocation()));
@@ -275,7 +275,7 @@ public class SWMWorldManager implements IWorldManger {
                 return;
             }
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done slime");
-            SlimeWorld w = loadWorldSlime(file);
+            SlimeWorld w = loadWorldSlime(file, replayWorld);
             ReplaySystem.getInstance().getLogger().info("onReplayStart: downloadWorld done slime done");
             Bukkit.getScheduler().runTask(ReplaySystem.getInstance(), () -> {
                 ReplaySystem.getInstance().getLogger().info("onReplayStart: loadWorld slime");
